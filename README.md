@@ -4,7 +4,7 @@
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)
 ![Prisma](https://img.shields.io/badge/Prisma-5.0-green)
 ![Redis](https://img.shields.io/badge/Redis-Upstash-red)
-![License](https://img.shields.io/badge/License-GPLv3-red)
+![License](https://img.shields.io/badge/License-Apache_2.0-blue)
 
 **A Secure, Self-Hosted Email Alias System for Discord Communities.**
 
