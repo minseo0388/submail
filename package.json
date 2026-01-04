@@ -1,6 +1,7 @@
 {
     "name": "submail-monorepo",
     "version": "1.0.0",
+    "author": "Choi Minseo",
     "private": true,
     "workspaces": [
         "apps/*",

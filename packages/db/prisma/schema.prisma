@@ -11,11 +11,14 @@ datasource db {
 }
 
 model User {
-  id        String   @id // Discord ID
-  realEmail String?
-  aliases   Alias[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String   @id @default(uuid())
+  providerId String   @unique // Discord ID
+  realEmail  String?
+  aliases    Alias[]
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([providerId])
 }
 
 model Alias {
@@ -27,6 +30,9 @@ model Alias {
   logs      Log[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([address])
+  @@index([userId])
 }
 
 model Rule {

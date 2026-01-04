@@ -1,0 +1,20 @@
+name: Publish Docs
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'SETUP.md'
+      - 'README.md'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      # Nothing to build for simple markdown, but this ensures 
+      # we can add a static site generator later (e.g., Jekyll/Docusaurus)
+      - name: Deploy to GitHub Pages (Placeholder)
+        run: echo "Follow Settings > Pages to deploy from branch"

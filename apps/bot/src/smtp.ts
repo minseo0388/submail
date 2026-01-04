@@ -3,6 +3,8 @@ import { simpleParser, ParsedMail } from 'mailparser';
 import { config } from './config';
 import { PrismaClient } from '@submail/db';
 import nodemailer from 'nodemailer';
+import pRetry from 'p-retry';
+import { sanitizeHeader, validateContent } from './utils/security';
 
 const prisma = new PrismaClient();
 
@@ -113,16 +115,35 @@ export function startSMTPServer() {
                         return callback();
                     }
 
+                    // SECURITY: Content & Spam Check
+                    if (!validateContent(parsed.text, parsed.html as string)) {
+                        console.log(`[SMTP] Blocked by security filters: ${alias.address}`);
+                        await (prisma as any).log.create({
+                            data: {
+                                aliasId: alias.id,
+                                sender: parsed.from?.text || "Unknown",
+                                subject: parsed.subject || "No Subject",
+                                status: "BLOCKED",
+                                message: "Content filtered (spam/urls)",
+                                destination: "Blocked"
+                            }
+                        });
+                        return callback();
+                    }
+
                     console.log(`[SMTP] Forwarding to ${targetEmail}`);
+
+                    const cleanSubject = sanitizeHeader(parsed.subject || "No Subject");
+                    const cleanSender = sanitizeHeader(parsed.from?.text || "Unknown");
 
                     const message = {
                         from: `forwardCheck@${config.smtp.domain}`,
                         to: targetEmail,
-                        subject: `[FWD] ${parsed.subject}`,
-                        text: `Forwarded from ${alias.address}@${config.smtp.domain}\n\nOriginal Sender: ${parsed.from?.text}\n\n${parsed.text}`,
+                        subject: `[FWD] ${cleanSubject}`,
+                        text: `Forwarded from ${alias.address}@${config.smtp.domain}\n\nOriginal Sender: ${cleanSender}\n\n${parsed.text}`,
                         html: parsed.html ? `
                             <p><strong>Forwarded from ${alias.address}@${config.smtp.domain}</strong></p>
-                            <p><strong>Original Sender:</strong> ${parsed.from?.text}</p>
+                            <p><strong>Original Sender:</strong> ${cleanSender}</p>
                             <hr/>
                             ${parsed.html}
                         ` : undefined,
@@ -135,7 +156,19 @@ export function startSMTPServer() {
                     };
 
                     try {
-                        await transporter.sendMail(message);
+                        const sendMail = async () => {
+                            await transporter.sendMail(message);
+                        };
+
+                        await pRetry(sendMail, {
+                            retries: 3,
+                            minTimeout: 2000, // Start at 2s
+                            factor: 2,        // 2s, 4s, 8s
+                            onFailedAttempt: (error: any) => {
+                                console.warn(`[SMTP] Forwarding attempt ${error.attemptNumber} failed. There are ${error.retriesLeft} retries left.`);
+                            }
+                        });
+
                         console.log("[SMTP] Forwarded successfully");
                         await (prisma as any).log.create({
                             data: {
