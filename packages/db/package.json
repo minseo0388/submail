@@ -1,0 +1,19 @@
+{
+    "name": "@submail/db",
+    "version": "1.0.0",
+    "main": "index.ts",
+    "types": "index.ts",
+    "scripts": {
+        "db:push": "prisma db push",
+        "db:studio": "prisma studio",
+        "generate": "prisma generate"
+    },
+    "dependencies": {
+        "@prisma/client": "^5.22.0"
+    },
+    "devDependencies": {
+        "@types/node": "^20.0.0",
+        "prisma": "^5.22.0",
+        "typescript": "^5.0.0"
+    }
+}

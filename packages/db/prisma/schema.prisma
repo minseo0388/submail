@@ -1,0 +1,52 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id        String   @id // Discord ID
+  realEmail String?
+  aliases   Alias[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Alias {
+  id        String   @id @default(uuid())
+  address   String   @unique // The 'local' part: user@...
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  rules     Rule[]
+  logs      Log[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Rule {
+  id          String   @id @default(uuid())
+  alias       Alias    @relation(fields: [aliasId], references: [id])
+  aliasId     String
+  type        String   // "FORWARD" or "BLOCK"
+  destination String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Log {
+  id        String   @id @default(uuid())
+  aliasId   String
+  alias     Alias    @relation(fields: [aliasId], references: [id])
+  sender    String?
+  subject   String?
+  destination String?
+  status    String   // "SUCCESS", "FAILED", "BLOCKED"
+  message   String?  // Error message or details
+  createdAt DateTime @default(now())
+}

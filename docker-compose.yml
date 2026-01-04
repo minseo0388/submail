@@ -1,0 +1,41 @@
+version: '3.9'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=file:/app/db/dev.db
+      - SMTP_DOMAIN=${SMTP_DOMAIN:-example.com}
+      - SMTP_PORT=${SMTP_PORT:-25}
+      - WEB_URL=${WEB_URL:-http://localhost:3000}
+      - NEXTAUTH_URL=${NEXTAUTH_URL:-http://localhost:3000}
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
+      - DISCORD_CLIENT_ID=${DISCORD_CLIENT_ID}
+      - DISCORD_CLIENT_SECRET=${DISCORD_CLIENT_SECRET}
+      - DISCORD_GUILD_ID=${DISCORD_GUILD_ID}
+    volumes:
+      - ./docker-data:/app/db
+    depends_on:
+      - bot # ensure bot starts, though they are independent
+    restart: unless-stopped
+
+  bot:
+    build:
+      context: .
+      dockerfile: apps/bot/Dockerfile
+    ports:
+      - "25:25"
+    environment:
+      - DATABASE_URL=file:/app/db/dev.db
+      - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}
+      - DISCORD_GUILD_ID=${DISCORD_GUILD_ID}
+      - SMTP_DOMAIN=${SMTP_DOMAIN:-example.com}
+      - SMTP_PORT=25 
+      - WEB_URL=${WEB_URL:-http://localhost:3000}
+    volumes:
+      - ./docker-data:/app/db
+    restart: unless-stopped
