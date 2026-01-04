@@ -22,7 +22,7 @@ Unlike standard forwarding services, Submail is **Discord-gated**, meaning only 
 
 ## 🏗️ Architecture
 
-The system consists of two main components: the **Web Dashboard** (Next.js) for management and the **SMTP Bot** (Node.js) for handling email traffic.
+The system consists of two main components: the **Web Dashboard** (Next.js 14) for management and the **SMTP Bot** (Node.js) for handling email traffic.
 
 ```mermaid
 sequenceDiagram
@@ -41,7 +41,7 @@ sequenceDiagram
     else Alias Active
         DB-->>SMTP: Forward to real@email.com
         SMTP->>Redis: Check Rate Limits
-        SMTP->>Receiver: Forward Email
+        SMTP->>Receiver: Forward Email (SRS-Lite Rewriting)
         SMTP->>DB: Log Audit Event
     end
 ```
@@ -56,34 +56,36 @@ sequenceDiagram
 -   **Privacy**: Your Discord ID is hashed or mapped to an internal UUID (`providerId` vs `id`), ensuring internal database IDs are never exposed.
 
 ### 🛡️ 2. Defense-in-Depth Security
+-   **Email Bypass & Anonymity**: Uses **SRS-Lite** (Sender Rewriting Scheme) logic. Forwarded emails appear to come from `forwardCheck@yourdomain.com` to pass SPF checks, while preserving the original sender context.
 -   **CSP (Content Security Policy)**: Blocks malicious scripts and XSS attacks using `strict-dynamic` rules (Report-Only mode supported).
--   **HSTS & Secure Cookies**: Forces HTTPS and prevents cookie theft via `SameSite=Lax` and `HttpOnly`.
 -   **Rate Limiting**: Protects the API and Mail Server using a **Sliding Window** algorithm backed by Upstash Redis.
--   **Fail-Safe**: If the database or Redis goes down, the system defaults to a safe state (Fail-Open for availability, Fail-Close for critical auth).
+-   **Fail-Safe**: Defaults to a safe state if external services (Redis/DB) are unreachable.
 
-### 📧 3. Mail Engine
--   **Spam Filtering**: Automatically rejects emails with excessive URLs or known spam keywords.
--   **Header Sanitization**: Strips dangerous headers (e.g., `Bcc`, `X-PHP-Originating-Script`) to prevent injection attacks.
+### 📧 3. Advanced Mail Engine
+-   **Deliverability**: Supports **DKIM Signing**, SPF, and DMARC compliance to ensuring your forwarded emails land in the Inbox, not Spam.
+-   **Spam Filtering**: Automatically rejects emails with excessive URLs (>20) or known spam keywords.
+-   **Header Sanitization**: Strips dangerous headers (e.g., `Bcc`, `X-PHP-Originating-Script`) to prevent header injection attacks.
 -   **Resilience**: Implements **Exponential Backoff Retry** (2s, 4s, 8s) to ensure mail delivery even during momentary network glitches.
 
 ---
 
 ## 🛠️ Technology Stack
 
-| Component | Technology | Purpose |
+| Component | Technology | Version / Details |
 | :--- | :--- | :--- |
 | **Frontend** | **Next.js 14** (App Router) | React Server Components, efficient rendering. |
 | **Backend** | **Next.js API Routes** | Serverless functions for Management API. |
 | **Mail Server** | **Node.js + Nodemailer** | Custom SMTP server listening on Port 25. |
+| **Type Safety** | **TypeScript** | Strict mode, using `@types/node` **v25** for latest API coverage. |
 | **Database** | **SQLite / Prisma** | Lightweight relational data storage. |
-| **Cache/Limit** | **Upstash Redis** | Distributed rate limiting and session store. |
-| **Styling** | **Tailwind CSS** | Rapid UI development. |
+| **Styling** | **Tailwind CSS v3** | Stable, utility-first CSS framework with Premium Design tokens. |
+| **Linting** | **ESLint v8** | Highly compatible configuration for Next.js 14. |
 
 ---
 
 ## ⚙️ Configuration Reference
 
-The `.env` file controls every aspect of the system.
+The `.env` file controls every aspect of the system. See `SETUP.md` for detailed instructions.
 
 ### Core & Identity
 
@@ -91,7 +93,7 @@ The `.env` file controls every aspect of the system.
 | :--- | :--- | :--- |
 | `DATABASE_URL` | ✅ | Connection string (e.g., `file:./dev.db`). |
 | `AUTH_SECRET` | ✅ | Random string for signing session cookies. |
-| `NEXTAUTH_URL` | ✅ | Full URL of your dashboard (e.g., `https://mail.u.com`). |
+| `NEXTAUTH_URL` | ✅ | Full URL of your dashboard. |
 
 ### Discord OAuth
 
@@ -108,22 +110,17 @@ The `.env` file controls every aspect of the system.
 | :--- | :--- | :--- |
 | `SMTP_DOMAIN` | ✅ | The domain aliases are created on (e.g., `example.com`). |
 | `SMTP_PORT` | Optional | Port to listen on (Default: 25). |
+| `DKIM_PRIVATE_KEY_PATH` | Optional | Path to private key for DKIM signing. |
+| `DKIM_KEY_SELECTOR` | Optional | DKIM selector (default: `default`). |
 | `UPSTASH_REDIS_REST_URL` | Optional | For Rate Limiting. |
-| `UPSTASH_REDIS_REST_TOKEN` | Optional | For Rate Limiting. |
 
 ---
 
-## 📦 Deployment Guides
+## 📦 Deployment
 
-### Option A: Vercel (Web Dashboard Only)
-Perfect for the management dashboard, but **cannot run the SMTP server**.
-1.  Fork repo -> Import to Vercel.
-2.  Set Environment Variables.
-3.  Deploy.
-4.  *Note: You will need a separate VPS for the `apps/bot` component.*
+**See [SETUP.md](./SETUP.md) for the complete, step-by-step deployment guide including DNS configuration.**
 
-### Option B: VPS / Docker (Recommended)
-Runs the full stack (Web + Mail) in one place.
+### Quick Start (Docker)
 
 1.  **Clone & Setup**:
     ```bash
@@ -134,22 +131,16 @@ Runs the full stack (Web + Mail) in one place.
 
 2.  **Start Services**:
     ```bash
-    # Install Deps
     npm install
-    
-    # Sync DB
     npx prisma db push
-    
-    # Build
     npm run build
-    
-    # Run pm2 or docker
     npm run start
     ```
 
 3.  **DNS Records**:
     -   **A Record**: `@` -> Your VPS IP.
     -   **MX Record**: `@` -> `mail.yourdomain.com` (Priority 10).
+    -   **TXT Record**: `v=spf1 mx ~all` (See SETUP.md for DKIM/DMARC).
 
 ---
 
