@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Outfit } from "next/font/google"; // Premium modern font
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"] });
+const outfit = Outfit({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Submail Dashboard",
-  description: "Manage your email aliases",
+  title: "Submail - Premium Email Alias System",
+  description: "Secure, Discord-gated email forwarding for communities.",
 };
 
 export default function RootLayout({
@@ -15,8 +15,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={inter.className}>{children}</body>
+    <html lang="en" className="dark">
+      <body className={`${outfit.className} antialiased min-h-screen selection:bg-indigo-500/30`}>
+        {children}
+      </body>
     </html>
   );
 }

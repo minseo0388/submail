@@ -17,6 +17,10 @@ export const authOptions: NextAuthOptions = {
         strategy: "jwt",
         maxAge: 30 * 24 * 60 * 60, // 30 days
     },
+    pages: {
+        signIn: '/auth/signin',
+        error: '/auth/error', // Optional: Add a custom error page later if needed
+    },
     cookies: {
         sessionToken: {
             name: `next-auth.session-token`,

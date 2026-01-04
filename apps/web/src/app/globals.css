@@ -1,26 +1,70 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    /* Premium Dark Theme Palette */
+    --background: 5 5 5;
+    /* #050505 */
+    --foreground: 237 237 237;
+    /* #ededed */
+
+    /* Accents - Indigo/Violet Gradient base */
+    --primary-start: 99 102 241;
+    /* Indigo 500 */
+    --primary-end: 139 92 246;
+    /* Violet 500 */
+
+    /* Glassmorphism Variables */
+    --glass-bg: 255 255 255;
+    --glass-border: 255 255 255;
   }
 }
 
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), sans-serif;
+  overflow-x: hidden;
+  /* Deep Space Gradient Mesh Background */
+  background-image:
+    radial-gradient(circle at 15% 50%, rgba(99, 102, 241, 0.08), transparent 25%),
+    radial-gradient(circle at 85% 30%, rgba(139, 92, 246, 0.08), transparent 25%);
+}
+
+/* Glass Utility Class */
+.glass {
+  background: rgba(var(--glass-bg), 0.03);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(var(--glass-border), 0.08);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.glass-hover:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.15);
+  transition: all 0.3s ease;
+}
+
+/* Text Gradient */
+.text-gradient {
+  background: linear-gradient(to right, var(--primary-start), var(--primary-end));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Button Glow */
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary-start), var(--primary-end));
+  color: white;
+  transition: opacity 0.3s;
+  box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
+  box-shadow: 0 0 30px rgba(99, 102, 241, 0.5);
 }

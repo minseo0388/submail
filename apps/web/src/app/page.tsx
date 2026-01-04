@@ -2,61 +2,95 @@ import Link from "next/link";
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-24 bg-gray-900 text-white">
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Submail System
-        </p>
-      </div>
+    <main className="flex min-h-screen flex-col items-center relative overflow-hidden">
 
-      <div className="relative flex flex-col place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-to-br before:from-transparent before:to-blue-700 before:opacity-10 before:blur-2xl after:absolute after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-to-t after:from-sky-900 after:via-[#0141ff] after:opacity-40 after:blur-2xl z-[-1]">
-        <h1 className="text-6xl font-bold mb-8">Submail</h1>
-        <p className="text-xl mb-12 text-gray-300">
-          Create email aliases for your domain, gated by Discord.
-        </p>
+      {/* Background Glow Effects */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-indigo-600/20 rounded-full blur-[120px] -z-10 mix-blend-screen animate-pulse" />
+      <div className="absolute bottom-0 right-0 w-[800px] h-[600px] bg-violet-600/10 rounded-full blur-[100px] -z-10" />
 
-        <Link href="/dashboard" className="px-8 py-4 bg-indigo-600 rounded-lg hover:bg-indigo-500 transition-colors font-semibold text-lg">
-          Login with Discord
+      {/* Navigation */}
+      <nav className="w-full max-w-7xl mx-auto px-6 py-8 flex justify-between items-center z-50">
+        <div className="text-2xl font-bold tracking-tighter text-white">
+          Sub<span className="text-indigo-400">mail</span>.
+        </div>
+        <Link
+          href="/dashboard"
+          className="glass hover:bg-white/10 px-6 py-2 rounded-full text-sm font-medium transition-all text-white/90 hover:text-white"
+        >
+          Login
         </Link>
-      </div>
+      </nav>
 
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-3 lg:text-left mt-20 gap-8">
-        <div className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30">
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Secure{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Verify identity via Discord server membership.
-          </p>
+      {/* Hero Section */}
+      <div className="flex flex-col items-center justify-center flex-1 text-center px-4 max-w-4xl mx-auto mt-10 mb-20">
+
+        {/* Badge */}
+        <div className="glass px-4 py-1.5 rounded-full mb-8 inline-flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+          <span className="text-xs font-medium text-indigo-300 tracking-wide uppercase">Discord Gated Security</span>
         </div>
 
-        <div className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30">
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Flexible{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Forward emails or block them instantly.
-          </p>
-        </div>
+        <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6 leading-[1.1]">
+          Identity Protection for <br />
+          <span className="text-gradient">Discord Communities</span>
+        </h1>
 
-        <div className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30">
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Simple{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Manage everything from a simple dashboard.
-          </p>
+        <p className="text-lg md:text-xl text-white/60 mb-10 max-w-2xl leading-relaxed">
+          Create unlimited email aliases that forward to your real inbox.
+          Managed entirely through your Discord identity.
+        </p>
+
+        <div className="flex flex-col sm:flex-row gap-4 w-full justify-center">
+          <Link
+            href="/dashboard"
+            className="btn-primary px-8 py-4 rounded-xl text-lg font-bold tracking-wide transform hover:scale-105 transition-all"
+          >
+            Get Started with Discord
+          </Link>
+          <a // href="https://github.com/minseo0388/submail" 
+            className="glass px-8 py-4 rounded-xl text-lg font-medium hover:bg-white/5 transition-all flex items-center justify-center gap-2"
+          >
+            Github Repo
+            <span className="text-white/50">↗</span>
+          </a>
         </div>
       </div>
+
+      {/* Feature Grid */}
+      <div className="max-w-7xl mx-auto px-6 pb-32 w-full grid md:grid-cols-3 gap-6">
+        <FeatureCard
+          title="Zero Spam"
+          desc="Turn off an alias instantly if it receives spam. Your real email is never exposed."
+          icon="🛡️"
+        />
+        <FeatureCard
+          title="Community Locked"
+          desc="Access is strictly limited to members of your verified Discord server."
+          icon="🔐"
+        />
+        <FeatureCard
+          title="Open Source"
+          desc="Self-hostable and transparent. You own your data and routing rules."
+          icon="📦"
+        />
+      </div>
+
+      {/* Footer */}
+      <footer className="w-full border-t border-white/5 py-8 text-center text-white/40 text-sm">
+        <p>&copy; {new Date().getFullYear()} Submail System. Made by Choi Minseo.</p>
+      </footer>
     </main>
   );
+}
+
+function FeatureCard({ title, desc, icon }: { title: string, desc: string, icon: string }) {
+  return (
+    <div className="glass p-8 rounded-2xl hover:bg-white/5 transition-all duration-300 group">
+      <div className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">{icon}</div>
+      <h3 className="text-xl font-bold text-white mb-2">{title}</h3>
+      <p className="text-white/60 leading-relaxed">
+        {desc}
+      </p>
+    </div>
+  )
 }

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 
 interface Rule {
     id: string;
-    type: string; // "FORWARD" | "BLOCK"
+    type: string;
     destination?: string | null;
 }
 
@@ -74,7 +74,7 @@ export default function AliasManagement({ aliases, domain }: { aliases: Alias[],
     };
 
     const handleDelete = async (id: string) => {
-        if (!confirm("Are you sure you want to delete this alias? Emails will bounce.")) return;
+        if (!confirm("Are you sure? This action cannot be undone.")) return;
 
         try {
             const res = await fetch(`/api/aliases?id=${id}`, { method: "DELETE" });
@@ -86,7 +86,6 @@ export default function AliasManagement({ aliases, domain }: { aliases: Alias[],
     };
 
     const handleToggle = async (id: string, currentStatus: boolean) => {
-        // Toggle logic
         const newStatus = !currentStatus;
         try {
             const res = await fetch("/api/aliases", {
@@ -108,125 +107,141 @@ export default function AliasManagement({ aliases, domain }: { aliases: Alias[],
     };
 
     return (
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold mb-4 dark:text-gray-200">My Aliases</h2>
+        <div className="glass rounded-3xl p-6 md:p-8">
+            <h2 className="text-xl font-bold text-white mb-6">Manage Aliases</h2>
 
             {/* Creation Form */}
-            <form onSubmit={handleCreate} className="mb-8 flex flex-col sm:flex-row gap-2 items-start">
-                <div className="flex-1 w-full">
-                    <div className="flex items-center border rounded px-3 py-2 dark:bg-gray-700 dark:border-gray-600 focus-within:ring-2 ring-blue-500 mb-2 sm:mb-0">
-                        <input
-                            type="text"
-                            value={newAlias}
-                            onChange={(e) => setNewAlias(e.target.value.toLowerCase().replace(/[^a-z0-9._-]/g, ""))}
-                            placeholder="username"
-                            className="bg-transparent outline-none flex-1 dark:text-white"
-                            minLength={3}
-                            maxLength={30}
-                            required
-                        />
-                        <span className="text-gray-500 dark:text-gray-400 select-none">@{domain}</span>
-                    </div>
-                    <p className="text-xs text-gray-400 mt-1 pl-1">Only lowercase letters, numbers, dots, dashes.</p>
+            <form onSubmit={handleCreate} className="mb-8 p-4 rounded-2xl bg-white/5 border border-white/10 flex flex-col md:flex-row gap-4 items-start md:items-center">
+
+                <div className="flex-1 w-full relative">
+                    <input
+                        type="text"
+                        value={newAlias}
+                        onChange={(e) => setNewAlias(e.target.value.toLowerCase().replace(/[^a-z0-9._-]/g, ""))}
+                        placeholder="your-alias"
+                        className="w-full bg-black/20 text-white border border-white/10 rounded-xl px-4 py-3 pr-32 focus:outline-none focus:border-indigo-500 transition-colors"
+                        minLength={3}
+                        maxLength={30}
+                        required
+                    />
+                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 font-mono text-sm">
+                        @{domain}
+                    </span>
                 </div>
 
-                <div className="flex-1 w-full sm:w-auto">
+                <div className="flex-[0.7] w-full">
                     <input
                         type="email"
                         value={newDestination}
                         onChange={(e) => setNewDestination(e.target.value)}
                         placeholder="Forward to (optional)"
-                        className="w-full border rounded px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white outline-none focus:ring-2 ring-blue-500 h-[42px]"
+                        className="w-full bg-black/20 text-white border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-500 transition-colors"
                     />
                 </div>
 
                 <button
                     type="submit"
                     disabled={loading}
-                    className="w-full sm:w-auto bg-blue-600 text-white px-6 py-2 rounded font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors h-[42px]"
+                    className="w-full md:w-auto btn-primary px-6 py-3 rounded-xl font-bold text-white whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                    {loading ? "Creating..." : "Create"}
+                    {loading ? "Generating..." : "Create Alias"}
                 </button>
             </form>
 
-            {error && <div className="bg-red-100 text-red-700 p-3 rounded mb-4 text-sm">{error}</div>}
+            {error && (
+                <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-200 text-sm flex items-center gap-2">
+                    <span className="text-lg">⚠️</span> {error}
+                </div>
+            )}
 
-            {/* List */}
-            <div className="space-y-3">
+            {/* Alias List */}
+            <div className="space-y-4">
                 {aliases.length === 0 ? (
-                    <div className="text-center py-8 text-gray-500 bg-gray-50 dark:bg-gray-900 rounded border border-dashed border-gray-300 dark:border-gray-700">
-                        No aliases created yet.
+                    <div className="text-center py-12 text-white/30 border-2 border-dashed border-white/10 rounded-2xl">
+                        No aliases found. Create your first one above!
                     </div>
                 ) : (
                     aliases.map((alias) => {
                         const fullAddress = `${alias.address}@${domain}`;
-                        // Determine if active: Look for rules. If any rule is BLOCK, it's inactive. Else active.
                         const isBlocked = alias.rules.some(r => r.type === "BLOCK");
                         const isActive = !isBlocked;
-
-                        // Get destination from rule
                         const activeRule = alias.rules.find(r => r.type === "FORWARD");
                         const destination = activeRule?.destination || "Default Email";
 
                         return (
-                            <div key={alias.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border rounded-lg dark:border-gray-700 bg-gray-50 dark:bg-gray-700/30 hover:bg-white dark:hover:bg-gray-700 transition-colors">
-                                <div className="flex items-center gap-3 mb-3 sm:mb-0">
-                                    <div className={`w-2 h-2 rounded-full ${isActive ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                                    <div>
+                            <div key={alias.id} className="group glass-hover bg-white/5 rounded-2xl p-4 md:p-6 transition-all border border-transparent hover:border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+
+                                <div className="flex items-start gap-4">
+                                    <div className={`mt-1.5 w-2.5 h-2.5 rounded-full shrink-0 shadow-[0_0_10px_rgba(0,0,0,0.5)] ${isActive ? 'bg-green-400 shadow-green-500/50' : 'bg-red-400 shadow-red-500/50'}`} />
+
+                                    <div className="space-y-1">
                                         <div className="flex items-center gap-2">
-                                            <span className="font-medium text-lg dark:text-gray-200">{fullAddress}</span>
+                                            <span className={`font-mono text-lg font-medium ${isActive ? 'text-white' : 'text-white/40 line-through'}`}>
+                                                {alias.address}
+                                                <span className="text-white/30">@{domain}</span>
+                                            </span>
+
                                             <button
                                                 onClick={() => copyToClipboard(fullAddress, alias.id)}
-                                                className="text-gray-400 hover:text-blue-500 transition-colors"
-                                                title="Copy to clipboard"
+                                                className="p-1.5 rounded-lg hover:bg-white/10 text-white/30 hover:text-white transition-colors"
+                                                title="Copy Address"
                                             >
                                                 {copyFeedback === alias.id ? (
-                                                    <span className="text-green-500 text-xs font-bold">Copied!</span>
+                                                    <span className="text-green-400 text-xs font-bold">✓</span>
                                                 ) : (
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
                                                 )}
                                             </button>
                                         </div>
-                                        <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-2">
+
+                                        <div className="text-sm text-white/50 flex items-center gap-2">
                                             {isActive ? (
                                                 editingId === alias.id ? (
-                                                    <div className="flex items-center gap-2 mt-1">
-                                                        <span className="text-xs">→</span>
+                                                    <div className="flex items-center gap-2 bg-black/30 rounded-lg p-1">
+                                                        <span className="text-xs ml-1">→</span>
                                                         <input
-                                                            className="border rounded px-2 py-0.5 text-xs dark:bg-gray-600 dark:text-white"
+                                                            className="bg-transparent border-none text-white text-xs w-32 focus:ring-0"
                                                             value={editDestination}
                                                             onChange={(e) => setEditDestination(e.target.value)}
+                                                            autoFocus
                                                         />
-                                                        <button onClick={() => handleUpdateDestination(alias.id)} className="text-green-600 text-xs hover:underline">Save</button>
-                                                        <button onClick={() => setEditingId(null)} className="text-gray-500 text-xs hover:underline">Cancel</button>
+                                                        <button onClick={() => handleUpdateDestination(alias.id)} className="text-green-400 text-xs px-2 hover:bg-white/10 rounded">Save</button>
+                                                        <button onClick={() => setEditingId(null)} className="text-white/40 text-xs px-2 hover:bg-white/10 rounded">✕</button>
                                                     </div>
                                                 ) : (
-                                                    <div className="flex items-center gap-1 group cursor-pointer" onClick={() => { setEditingId(alias.id); setEditDestination(destination); }}>
-                                                        <span>→ {destination}</span>
-                                                        <span className="opacity-0 group-hover:opacity-100 text-xs text-blue-500">Edit</span>
+                                                    <div className="flex items-center gap-1.5 cursor-pointer hover:text-indigo-300 transition-colors" onClick={() => { setEditingId(alias.id); setEditDestination(destination); }}>
+                                                        <span className="text-xs">↳</span>
+                                                        <span>{destination}</span>
+                                                        <span className="opacity-0 group-hover:opacity-100 text-[10px] bg-white/10 px-1 rounded">EDIT</span>
                                                     </div>
                                                 )
                                             ) : (
-                                                "Blocking all emails"
+                                                <span className="text-red-400/60 text-xs">⛔ Paused (Messages Rejected)</span>
                                             )}
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-2 pl-6 md:pl-0 border-l border-white/5 md:border-l-0">
                                     <button
                                         onClick={() => handleToggle(alias.id, isActive)}
-                                        className={`px-3 py-1.5 text-sm rounded border ${isActive ? 'bg-white border-gray-300 hover:bg-gray-50 text-gray-700' : 'bg-green-100 border-green-200 text-green-800 hover:bg-green-200'}`}
+                                        className={`px-4 py-2 text-xs font-bold rounded-lg uppercase tracking-wider transition-colors ${isActive
+                                                ? 'bg-white/5 text-white/60 hover:bg-white/10 hover:text-white'
+                                                : 'bg-green-500/20 text-green-400 hover:bg-green-500/30'
+                                            }`}
                                     >
                                         {isActive ? "Pause" : "Resume"}
                                     </button>
+
                                     <button
                                         onClick={() => handleDelete(alias.id)}
-                                        className="px-3 py-1.5 text-sm rounded border border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 transition-colors"
+                                        className="p-2 text-white/20 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                                        title="Delete Alias"
                                     >
-                                        Delete
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                                     </button>
                                 </div>
+
                             </div>
                         );
                     })
