@@ -20,7 +20,7 @@ export default async function Dashboard() {
         orderBy: { createdAt: 'desc' }
     });
 
-    const recentLogs = await (prisma as any).log.findMany({
+    const recentLogs = await prisma.log.findMany({
         where: {
             alias: {
                 userId: userId

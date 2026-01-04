@@ -87,7 +87,7 @@ export function startSMTPServer() {
                 const blockRule = alias.rules.find((r: any) => r.type === "BLOCK");
                 if (blockRule) {
                     console.log(`[SMTP] Blocked email for ${alias.address}`);
-                    await (prisma as any).log.create({
+                    await prisma.log.create({
                         data: {
                             aliasId: alias.id,
                             sender: parsed.from?.text || "Unknown",
