@@ -86,6 +86,7 @@ sequenceDiagram
 The `.env` file controls every aspect of the system.
 
 ### Core & Identity
+
 | Variable | Required | Description |
 | :--- | :--- | :--- |
 | `DATABASE_URL` | ✅ | Connection string (e.g., `file:./dev.db`). |
@@ -93,6 +94,7 @@ The `.env` file controls every aspect of the system.
 | `NEXTAUTH_URL` | ✅ | Full URL of your dashboard (e.g., `https://mail.u.com`). |
 
 ### Discord OAuth
+
 | Variable | Required | Description |
 | :--- | :--- | :--- |
 | `DISCORD_CLIENT_ID` | ✅ | From Discord Developer Portal. |
@@ -101,6 +103,7 @@ The `.env` file controls every aspect of the system.
 | `DISCORD_GUILD_ID` | ⚠️ | **Crucial**: The Server ID allowing access. |
 
 ### Mail & Redis
+
 | Variable | Required | Description |
 | :--- | :--- | :--- |
 | `SMTP_DOMAIN` | ✅ | The domain aliases are created on (e.g., `example.com`). |
