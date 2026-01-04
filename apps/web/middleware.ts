@@ -7,7 +7,7 @@ const protectedPaths = ["/admin", "/api/protected"];
 
 export default async function middleware(req: NextRequest) {
     try {
-        const token = await getToken({ req, secret: process.env.AUTH_SECRET });
+        const token = await getToken({ req, secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET });
         const { pathname } = req.nextUrl;
 
         // Check if the current path is one of the protected paths

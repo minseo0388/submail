@@ -1,6 +1,6 @@
 import 'server-only';
 import { getServerSession } from "next-auth";
-import { authOptions } from "../auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 import { PrismaClient } from "@submail/db";
 import { NextResponse } from "next/server";
 import { z } from "zod";

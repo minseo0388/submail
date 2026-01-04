@@ -6,7 +6,8 @@ dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
 
 const required = [
     'DATABASE_URL',
-    'AUTH_SECRET',
+    'DATABASE_URL',
+    // 'AUTH_SECRET', // Deprecated in favor of NEXTAUTH_SECRET
     'NEXTAUTH_URL',
     'NEXTAUTH_SECRET',
     'DISCORD_CLIENT_ID',

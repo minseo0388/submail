@@ -29,7 +29,7 @@
 
 Before you begin, ensure you have:
 
-- **Node.js**: v18.17 or higher (v20 Recommended)
+- **Node.js**: v20 or higher (v22 Recommended)
 - **Docker**: For easy deployment (Optional)
 - **Discord Application**: Create one at [Discord Developers](https://discord.com/developers/applications).
 
@@ -110,6 +110,35 @@ When deploying to production:
 # Apply migrations to prod DB
 npx prisma migrate deploy
 ```
+
+---
+
+
+---
+
+## 📡 Deliverability & DNS
+
+To ensure your emails land in the Inbox (not Spam), you **must** configure these DNS records.
+
+### 1. Reverse DNS (PTR)
+*Action*: Go to your VPS Provider (AWS, DigitalOcean, etc.) settings.
+*   **Value**: `mail.yourdomain.com` (Must match your SMTP hostname)
+
+### 2. SPF (Sender Policy Framework)
+*Record Type*: `TXT`
+*   **Host**: `@`
+*   **Value**: `v=spf1 mx a:mail.yourdomain.com -all`
+
+### 3. DKIM (DomainKeys Identified Mail)
+*Record Type*: `TXT`
+*   **Host**: `default._domainkey` (or your selector)
+*   **Value**: `v=DKIM1; k=rsa; p=YOUR_PUBLIC_KEY_HERE`
+    > *Note*: Generate this keypair using `openssl` or an online tool. Put the private key on your server and path in `.env`.
+
+### 4. DMARC
+*Record Type*: `TXT`
+*   **Host**: `_dmarc`
+*   **Value**: `v=DMARC1; p=quarantine; rua=mailto:admin@yourdomain.com`
 
 ---
 
